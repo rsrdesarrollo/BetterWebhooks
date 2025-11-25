@@ -11,3 +11,4 @@ functional-temp
 splunktional-temp
 stage/
 demo/
+*.spl

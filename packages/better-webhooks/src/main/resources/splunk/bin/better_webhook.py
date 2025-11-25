@@ -11,8 +11,8 @@ from urllib.parse import urlparse
 
 import requests
 import splunk.rest  # type: ignore
-from splunk.clilib import cli_common as cli  # type: ignore
 from hmac_helper import get_hmac_headers
+from splunk.clilib import cli_common as cli  # type: ignore
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lib"))
 
@@ -26,7 +26,7 @@ def get_credential(name: str, session_key: str):
     """
     Grab a specific credential from Splunk's credential store and JSON-decode it
     """
-    url = f"/servicesNS/nobody/BetterWebhooks/storage/passwords/{name}"
+    url = f"/servicesNS/nobody/BetterWebhooks/storage/passwords/better_webhooks:{name}"
 
     server_response, server_content = splunk.rest.simpleRequest(
         url, getargs={"output_mode": "json"}, sessionKey=session_key
@@ -48,7 +48,12 @@ def get_credential(name: str, session_key: str):
 
 
 def send_webhook_request(
-    url: str, body: bytes, headers: dict, auth: Union[tuple, None], user_agent: str, proxy: str
+    url: str,
+    body: bytes,
+    headers: dict,
+    auth: Union[tuple, None],
+    user_agent: str,
+    proxy: str,
 ):
     """
     Send the webhook and attempt to log as much information as possible if it fails.
@@ -64,10 +69,10 @@ def send_webhook_request(
         }
     else:
         proxies = None
-    
+
     if len(body) > 0:
         headers["Content-Type"] = "application/json"
-    
+
     headers["User-Agent"] = user_agent
     logger.info(
         "Sending POST request to url={} with size={} bytes payload",
@@ -154,9 +159,9 @@ if __name__ == "__main__":
         elif credential["type"] == "header":
             auth = None
             headers = {
-                credential.get("header_name").strip(): credential.get(
-                    "header_value"
-                ).strip()
+                credential.get("header_name")
+                .strip(): credential.get("header_value")
+                .strip()
             }
         elif credential["type"] == "hmac":
             auth = None
@@ -176,7 +181,9 @@ if __name__ == "__main__":
             )
 
         user_agent = settings["configuration"].get("user_agent", "Splunk")
-        if not send_webhook_request(url, body, headers, auth, user_agent=user_agent, proxy=proxy):
+        if not send_webhook_request(
+            url, body, headers, auth, user_agent=user_agent, proxy=proxy
+        ):
             sys.exit(2)
     except Exception as e:
         logger.error(
