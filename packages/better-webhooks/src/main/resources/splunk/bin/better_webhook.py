@@ -159,9 +159,7 @@ if __name__ == "__main__":
         elif credential["type"] == "header":
             auth = None
             headers = {
-                credential.get("header_name")
-                .strip(): credential.get("header_value")
-                .strip()
+                credential.get("header_name").strip(): credential.get("header_value").strip()
             }
         elif credential["type"] == "hmac":
             auth = None
